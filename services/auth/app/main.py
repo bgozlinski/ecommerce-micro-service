@@ -21,6 +21,6 @@ async def read_users(db: Session = Depends(get_db)):
     return users
 
 @app.post("/users", response_model=UserCreateResponse, status_code=status.HTTP_201_CREATED)
-async def create_user(payload: UserCreate, db: Session = Depends(get_db)):
-    user = user_crud.create_user(db, payload)
+async def create_user(user_create: UserCreate, db: Session = Depends(get_db)):
+    user = user_crud.create_user(db=db, user=user_create)
     return UserCreateResponse(user=UserResponse.model_validate(user))
