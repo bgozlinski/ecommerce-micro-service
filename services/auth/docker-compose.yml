@@ -38,15 +38,15 @@ services:
       env_file:
         - .env
       environment:
-        - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+        - DATABASE_URL=postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
       ports:
-        - "8001:8000"
+        - "8000:8000"
       depends_on:
         auth-service-db:
           condition: service_healthy
       volumes:
         - ./app:/app/app
-      command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
       healthcheck:
         test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
         interval: 30s
@@ -55,7 +55,3 @@ services:
         start_period: 40s
       networks:
         - auth-network
-
-
-
-
