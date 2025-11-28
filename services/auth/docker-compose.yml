@@ -1,5 +1,12 @@
-services:
+networks:
+  auth-network:
+    driver: bridge
 
+volumes:
+  postgres-data:
+
+
+services:
     auth-service-db:
       container_name: auth-service-db
       restart: unless-stopped
@@ -19,6 +26,8 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
+      networks:
+        - auth-network
 
     auth-service:
       container_name: auth-service
@@ -47,9 +56,6 @@ services:
       networks:
         - auth-network
 
-networks:
-  auth-network:
-    driver: bridge
 
-volumes:
-  postgres-data:
+
+
