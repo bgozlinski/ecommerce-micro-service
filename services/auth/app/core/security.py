@@ -21,10 +21,10 @@ def create_access_token(data: dict, expires_delta: int | None = None) -> str:
 
     to_encode = {**data, "iat": int(now.timestamp()), "exp": int(expire.timestamp())}
 
-    enconde_jwt = jwt.encode(
+    encoded_jwt  = jwt.encode(
         payload=to_encode,
         key=settings.JWT_SECRET_KEY,
         algorithm=settings.JWT_ALGORITHM,
     )
 
-    return enconde_jwt
+    return encoded_jwt
