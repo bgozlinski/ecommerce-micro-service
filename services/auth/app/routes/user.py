@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.crud import user as user_crud
+from app.repositories import user as user_crud
 from app.schemas.user import UserCreate, UserResponse, UserCreateResponse
 from app.core.config import settings
 
