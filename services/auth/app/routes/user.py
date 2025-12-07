@@ -12,7 +12,7 @@ async def read_users(db: Session = Depends(get_db)):
     users = user_crud.get_users(db)
     return users
 
-@router.post("/users", response_model=UserCreateResponse, status_code=status.HTTP_201_CREATED)
-async def create_user(user_create: UserCreate, db: Session = Depends(get_db)):
+@router.post("/register", response_model=UserCreateResponse, status_code=status.HTTP_201_CREATED)
+async def register(user_create: UserCreate, db: Session = Depends(get_db)):
     user = user_crud.create_user(db=db, user=user_create)
     return UserCreateResponse(user=UserResponse.model_validate(user))
