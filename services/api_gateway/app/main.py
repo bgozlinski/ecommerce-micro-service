@@ -1,3 +1,10 @@
+"""FastAPI application entry-point for the API Gateway.
+
+The gateway routes external HTTP requests to internal microservices. Routers are
+mounted under a shared API prefix (e.g., `/api/v1`). Health and root endpoints
+are provided for basic diagnostics and metadata.
+"""
+
 from fastapi import FastAPI, Request, Response
 from app.core.config import settings
 from app.core.route_wrapper import route
