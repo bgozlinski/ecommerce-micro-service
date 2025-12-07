@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     PUBLIC_PATHS: list[str] = [
         "/", "/health",
         "/docs", "/openapi.json", "/redoc",
-        "/api/v1/login", "/api/v1/register", "/api/v1/users"
+        "/api/v1/login", "/api/v1/register",
     ]
 
 
