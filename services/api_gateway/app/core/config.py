@@ -14,12 +14,6 @@ class Settings(BaseSettings):
 
     AUTH_SERVICE_URL: str = "http://auth-service:8000"
 
-    PUBLIC_PATHS: list[str] = [
-        "/", "/health",
-        "/docs", "/openapi.json", "/redoc",
-        "/api/v1/login", "/api/v1/register",
-    ]
-
 
     class Config:
         env_file = ".env"
