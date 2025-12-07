@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from app.routes.auth import router as auth_router
-app = FastAPI()
+from app.core.config import settings
+from app.core.jwt_middleware import JWTAuthMiddleware
+
+app = FastAPI(title=settings.PROJECT_NAME)
+
+app.add_middleware(JWTAuthMiddleware, public_paths=settings.PUBLIC_PATHS)
 app.include_router(auth_router)
 
 @app.get("/health")
