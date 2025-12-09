@@ -8,6 +8,25 @@ import functools
 
 
 def generate_request_headers(payload: dict) -> dict:
+    """Build gateway context headers from a decoded JWT payload.
+
+    Extracts the user identifier and role from common JWT claim names and
+    returns a header dictionary that downstream services in this project rely on.
+
+    Header mapping:
+      - ``X-User-Id`` from ``sub`` or ``user_id`` claim
+      - ``X-User-Role`` from ``role`` or ``X-User-Role`` claim
+
+    Notes:
+      - Services trust these headers (the gateway verifies JWTs). See project
+        guidelines: Services must not verify JWTs themselves.
+
+    Args:
+      payload: The decoded JWT payload (dict of claims).
+
+    Returns:
+      dict: Headers to forward to internal services (possibly empty).
+    """
     headers = {}
     user_id = payload.get("sub") or payload.get("user_id")
     role = payload.get("role") or payload.get("X-User-Role")
@@ -19,6 +38,18 @@ def generate_request_headers(payload: dict) -> dict:
 
 
 def import_function(method_path: str):
+    """Dynamically import a function by its dotted path.
+
+    Example:
+      ``import_function("pkg.module.my_hook")`` -> returns ``my_hook`` or ``None``.
+
+    Args:
+      method_path: Dotted path to the target callable (e.g., "a.b.c").
+
+    Returns:
+      The attribute referenced by the last segment of the path if found,
+      otherwise ``None``.
+    """
     module, method = method_path.rsplit('.', 1)
     mod = __import__(module, fromlist=[method])
     return getattr(mod, method, None)
@@ -30,14 +61,34 @@ def route(request_method,
           service_url: str,
           authentication_required: bool = False,
           post_processing_func: Optional[str] = None,
-          timeout_seconds: float = 15.0):
-    """Define a proxy endpoint that forwards to an internal service.
-    - request_method: app.get/app.post/...
-    - path: "/api/v1/users"
-    - status_code: expected success status
-    - service_url: e.g. settings.AUTH_SERVICE_URL
-    - authentication_required: verify JWT if True
-    - post_processing_func: optional callable path "pkg.mod.func(content|dict)"
+          timeout_seconds: float = 15.0
+          ) -> Callable:
+    """Decorator factory to register a proxy route to an internal service.
+
+    This helper attaches a FastAPI route (via the provided ``request_method``
+    such as ``app.get``/``app.post``) that forwards the incoming request to a
+    downstream service URL while handling:
+      - Optional JWT verification at the gateway level.
+      - Propagation of user context headers (``X-User-Id``, ``X-User-Role``).
+      - Transparent streaming of status code and response content-type.
+      - Optional post-processing hook on successful responses.
+
+    The resulting decorator should wrap a no-op handler (the wrapped function
+    isn't called; it exists only to satisfy FastAPI's signature requirements).
+
+    Args:
+      request_method: A FastAPI route registrar like ``app.get`` or ``app.post``.
+      path: The path to bind on the gateway (e.g., "/api/v1/users").
+      status_code: Expected success status; if matched, the post hook is invoked.
+      service_url: Base URL of the internal service (e.g., settings.AUTH_SERVICE_URL).
+      authentication_required: When True, validates the Authorization Bearer
+        token and derives user context headers.
+      post_processing_func: Optional dotted path to a callable hook that accepts
+        raw ``bytes`` response content and returns transformed content.
+      timeout_seconds: HTTP client timeout for the upstream request.
+
+    Returns:
+      Callable: A decorator that registers the proxy route.
     """
     app_any = request_method(path, status_code=status_code)
 
