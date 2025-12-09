@@ -26,4 +26,6 @@ class UserCreateResponse(BaseModel):
     detail: str = "User created successfully"
 
 
-
+class UserDeleteResponse(BaseModel):
+    user: UserResponse
+    detail: str = "User deleted successfully"

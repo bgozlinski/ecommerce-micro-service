@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 from typing import Optional, List
 from app.models.user import User
 from app.schemas.user import UserCreate
@@ -36,3 +35,11 @@ def create_user(db: Session, user: UserCreate) -> User:
     db.refresh(db_user)
 
     return db_user
+
+def delete_user(db: Session, user_id: int) -> None:
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return
+    db.delete(user)
+    db.commit()
+
