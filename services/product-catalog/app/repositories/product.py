@@ -21,10 +21,10 @@ def create_product(db: Session, product: ProductCreate) -> Product:
     db.refresh(db_product)
     return db_product
 
-def delete_product(db: Session, product_id: int) -> None:
+def delete_product(db: Session, product_id: int) -> bool:
     product = get_product_by_id(db, product_id)
     if not product:
-        return
+        return False
     db.delete(product)
     db.commit()
-
+    return True

@@ -7,12 +7,12 @@ from app.core.config import settings
 
 router = APIRouter(prefix=settings.API_V1_PREFIX)
 
-@router.get("/products", response_model=list[ProductBase])
+@router.get("/products", response_model=list[ProductOut])
 async def read_products(db: Session = Depends(get_db)):
     products = product_crud.get_products(db)
     return products
 
-@router.get("/products/{product_id}", response_model=ProductBase)
+@router.get("/products/{product_id}", response_model=ProductOut)
 async def read_product(product_id: int, db: Session = Depends(get_db)):
     product = product_crud.get_product_by_id(db, product_id)
     if not product:
@@ -23,3 +23,10 @@ async def read_product(product_id: int, db: Session = Depends(get_db)):
 async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     product = product_crud.create_product(db=db, product=product)
     return product
+
+@router.delete("/products/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_product(product_id: int, db: Session = Depends(get_db)):
+    deleted = product_crud.delete_product(db, product_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    return None
