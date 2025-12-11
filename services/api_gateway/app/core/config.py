@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     AUTH_SERVICE_URL: str = "http://auth-service:8000"
+    PRODUCT_SERVICE_URL: str = "http://product-service:8000"
 
 
     class Config:

@@ -10,11 +10,13 @@ from app.core.config import settings
 from app.core.route_wrapper import route
 from app.routes.auth import router as auth_router
 from app.routes.users import router as users_router
+from app.routes.product import router as product_router
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
 app.include_router(auth_router, prefix=settings.API_V1_PREFIX, tags=["auth"])
 app.include_router(users_router, prefix=settings.API_V1_PREFIX, tags=["users"])
+app.include_router(product_router, prefix=settings.API_V1_PREFIX, tags=["product-catalog"])
 
 @app.get("/health")
 async def health_check():
