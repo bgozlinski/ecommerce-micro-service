@@ -14,8 +14,8 @@ def get_products(
 ) -> List[Product]:
     return db.query(Product).offset(skip).limit(limit).all()
 
-def create_product(db: Session, product: ProductCreate ) -> Product:
-    db_product = Product(**product.dict())
+def create_product(db: Session, product: ProductCreate) -> Product:
+    db_product = Product(**product.model_dump())
     db.add(db_product)
     db.commit()
     db.refresh(db_product)

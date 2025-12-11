@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.repositories import product as product_crud
-from app.schemas.user import ProductCreate, ProductBase
+from app.schemas import ProductCreate, ProductBase, ProductOut
 from app.core.config import settings
 
 router = APIRouter(prefix=settings.API_V1_PREFIX)
@@ -19,7 +19,7 @@ async def read_product(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     return product
 
-@router.post("/products", response_model=ProductBase, status_code=status.HTTP_201_CREATED)
+@router.post("/products", response_model=ProductOut, status_code=status.HTTP_201_CREATED)
 async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     product = product_crud.create_product(db=db, product=product)
-    return ProductCreate(product=ProductBase.model_validate(product))
+    return product
