@@ -23,3 +23,14 @@ router = APIRouter()
 )
 async def list_products(request: Request, response: Response):
     pass
+
+@route(
+    request_method=router.get,
+    path="/products/{product_id}",
+    status_code=200,
+    service_url=settings.PRODUCT_SERVICE_URL,
+    authentication_required=False,
+
+)
+async def read_product(request: Request, response: Response):
+    pass
