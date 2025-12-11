@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, func
-from sqlalchemy.orm import declarative_mixin
 from app.core.database import Base
+from sqlalchemy import Column, Integer, String, Boolean, Text, func, DateTime
 
 class User(Base):
     __tablename__ = "users"
