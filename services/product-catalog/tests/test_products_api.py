@@ -18,6 +18,7 @@ from app.main import app
 from app.core.database import Base
 from app.core import database as db_module
 from app.models.product import Product
+from datetime import datetime, timezone
 
 
 @pytest.fixture()
@@ -56,7 +57,7 @@ def client():
 
 
 def seed_products(session):
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     rows = [
         Product(name="Witcher 3", description="RPG game", price_cents=1099, currency="PLN", category="RPG", platform="Steam", is_active=True, created_at=now - timedelta(days=3)),
         Product(name="Cyberpunk 2077", description="Sci-fi RPG", price_cents=1599, currency="PLN", category="RPG", platform="GOG", is_active=True, created_at=now - timedelta(days=2)),

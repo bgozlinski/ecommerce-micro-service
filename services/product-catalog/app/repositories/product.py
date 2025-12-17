@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 from app.models.product import Product
 from app.schemas.product import ProductCreate, ProductPatch
-from datetime import datetime
+from datetime import datetime, timezone
 
 def get_product_by_id(db: Session, product_id: int) -> Optional[Product]:
     return db.query(Product).filter(Product.id == product_id).first()
@@ -96,7 +96,7 @@ def update_product(db: Session, product_id: int, dto: ProductPatch) -> Optional[
     if dto.is_active is not None:
         product.is_active = bool(dto.is_active)
 
-    product.updated_at = datetime.utcnow()
+    product.updated_at = datetime.now(timezone.utc)
 
     db.add(product)
     db.commit()
