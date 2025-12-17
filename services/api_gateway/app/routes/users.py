@@ -1,10 +1,14 @@
 """Auth-related proxy routes for the API Gateway.
 
 These endpoints forward requests to the Auth Service using the custom `route`
-wrapper. For protected routes, the wrapper decodes the client JWT at the
-gateway and injects `X-User-Id` and `X-User-Role` headers into the internal
-request. The downstream services trust these headers and do not verify the JWT
-again (per project guidelines).
+wrapper. For protected routes, the gateway verifies the client JWT and injects
+`X-User-Id` and `X-User-Role` headers into the internal request. Downstream
+services trust these headers and do not verify JWTs again (per project guidelines).
+
+Access model:
+- POST /register: public
+- GET /users, GET /users/{user_id}, DELETE /users/{user_id}, PATCH /users/{user_id}:
+  admin-only (enforced at gateway via `admin_required=True`)
 """
 
 from fastapi import APIRouter, Request, Response
@@ -51,4 +55,15 @@ async def get_user_by_id(request: Request, response: Response):
     authentication_required=True,
 )
 async def delete_user(request: Request, response: Response):
+    pass
+
+@route(
+    request_method=router.patch,
+    path="/users/{user_id}",
+    status_code=200,
+    service_url=settings.AUTH_SERVICE_URL,
+    authentication_required=True,
+    admin_required=True,
+)
+async def patch_user(request: Request, response: Response):
     pass
