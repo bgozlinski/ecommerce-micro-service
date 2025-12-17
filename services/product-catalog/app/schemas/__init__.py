@@ -1,4 +1,4 @@
-from .product import ProductBase, ProductCreate, ProductUpdate, ProductOut
+from .product import ProductBase, ProductCreate, ProductUpdate, ProductOut, ProductPatch
 
 
 __all__ = [
@@ -6,4 +6,6 @@ __all__ = [
     "ProductCreate",
     "ProductUpdate",
     "ProductOut",
+    "ProductPatch",
+
 ]
