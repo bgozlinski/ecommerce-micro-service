@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from app.models.user import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserPatch
 from app.core.security import hash_password
 from fastapi import HTTPException, status
 
@@ -43,3 +43,19 @@ def delete_user(db: Session, user_id: int) -> None:
     db.delete(user)
     db.commit()
 
+def update_user(db: Session, user_id: int, dto: UserPatch) -> Optional[User]:
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return None
+
+    if dto.role is not None:
+        user.role = dto.role
+    if dto.is_active is not None:
+        user.is_active = dto.is_active
+    if dto.password is not None:
+        user.password_hash = hash_password(dto.password)
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
