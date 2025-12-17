@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -30,3 +30,31 @@ class ProductOut(ProductBase):
 
     class Config:
         from_attributes = True
+
+
+class ProductPatch(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price_cents: Optional[int] = None
+    currency: Optional[str] = None
+    category: Optional[str] = None
+    platform: Optional[str] = None
+    is_active: Optional[bool] = None
+
+    @field_validator("price_cents")
+    @classmethod
+    def validate_price(cls, v):
+        if v is None:
+            return v
+        if v < 0:
+            raise ValueError("price_cents must be >= 0")
+        return v
+
+    @field_validator("currency")
+    @classmethod
+    def validate_currency(cls, v):
+        if v is None:
+            return v
+        if len(v) != 3:
+            raise ValueError("currency must be a 3-letter code")
+        return v.upper()
