@@ -10,15 +10,53 @@ def get_product_by_id(db: Session, product_id: int) -> Optional[Product]:
 def get_products(
         db: Session,
         skip: int = 0,
-        limit: int = 100
+        limit: int = 100,
+        *,
+        category: Optional[str] = None,
+        platform: Optional[str] = None,
+        min_price_cents: Optional[int] = None,
+        max_price_cents: Optional[int] = None,
+        is_active: Optional[bool] = True,
+        search: Optional[str] = None,
+        sort_by: str = "created_at",
+        sort_dir: str = "desc",
 ) -> List[Product]:
-    return (
-        db.query(Product)
-        .filter(Product.is_active == True)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    """List products with optional filtering and sorting.
+
+    Defaults keep backward compatibility: only active products, sorted by created_at desc.
+    """
+    q = db.query(Product)
+
+    if is_active is not None:
+        q = q.filter(Product.is_active == bool(is_active))
+    if category:
+        q = q.filter(Product.category == category)
+    if platform:
+        q = q.filter(Product.platform == platform)
+    if min_price_cents is not None:
+        q = q.filter(Product.price_cents >= int(min_price_cents))
+    if max_price_cents is not None:
+        q = q.filter(Product.price_cents <= int(max_price_cents))
+    if search:
+        like = f"%{search}%"
+
+        from sqlalchemy import or_, func
+        q = q.filter(or_(func.lower(Product.name).like(like.lower()), func.lower(Product.description).like(like.lower())))
+
+    sort_map = {
+        "created_at": Product.created_at,
+        "updated_at": Product.updated_at,
+        "price_cents": Product.price_cents,
+        "name": Product.name,
+        "id": Product.id,
+    }
+    sort_col = sort_map.get(sort_by, Product.created_at)
+    if (sort_dir or "desc").lower() == "asc":
+        q = q.order_by(sort_col.asc())
+    else:
+        q = q.order_by(sort_col.desc())
+
+    return q.offset(skip).limit(limit).all()
 
 def create_product(db: Session, product: ProductCreate) -> Product:
     db_product = Product(**product.model_dump())
