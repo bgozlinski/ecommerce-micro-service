@@ -1,4 +1,3 @@
-# app/core/route_wrapper.py
 from typing import Callable, Optional
 from fastapi import Request, Response, HTTPException, status
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -61,7 +60,8 @@ def route(request_method,
           service_url: str,
           authentication_required: bool = False,
           post_processing_func: Optional[str] = None,
-          timeout_seconds: float = 15.0
+          timeout_seconds: float = 15.0,
+          admin_required: bool = False
           ) -> Callable:
     """Decorator factory to register a proxy route to an internal service.
 
@@ -77,15 +77,17 @@ def route(request_method,
     isn't called; it exists only to satisfy FastAPI's signature requirements).
 
     Args:
-      request_method: A FastAPI route registrar like ``app.get`` or ``app.post``.
+      request_method: A FastAPI route registrar like `app.get` or `app.post`.
       path: The path to bind on the gateway (e.g., "/api/v1/users").
       status_code: Expected success status; if matched, the post hook is invoked.
       service_url: Base URL of the internal service (e.g., settings.AUTH_SERVICE_URL).
-      authentication_required: When True, validates the Authorization Bearer
-        token and derives user context headers.
+      authentication_required: When True, validates the Authorization Bearer token
+        and derives user context headers.
       post_processing_func: Optional dotted path to a callable hook that accepts
-        raw ``bytes`` response content and returns transformed content.
+        raw `bytes` response content and returns transformed content.
       timeout_seconds: HTTP client timeout for the upstream request.
+      admin_required: When True, the gateway requires a valid JWT and enforces that
+        the user role is `admin`. Missing/invalid token yields 401; non-admin role yields 403.
 
     Returns:
       Callable: A decorator that registers the proxy route.
@@ -108,6 +110,11 @@ def route(request_method,
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
                 except InvalidTokenError:
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+            if admin_required:
+                role = (payload.get("role") or payload.get("X-User-Role") or "").lower()
+                if role != "admin":
+                    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admins can access this resource")
 
             forward_headers = {
                 k: v for k, v in request.headers.items()
