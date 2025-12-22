@@ -21,6 +21,7 @@ async def read_products(
     sort_by: str = Query("created_at", pattern="^(created_at|updated_at|price_cents|name|id)$"),
     sort_dir: str = Query("desc", pattern="^(asc|desc)$"),
 ):
+
     products = product_crud.get_products(
         db,
         skip=skip,
