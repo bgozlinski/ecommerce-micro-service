@@ -1,0 +1,57 @@
+services:
+    inventory-service-db:
+      container_name: inventory-service-db
+      restart: unless-stopped
+      image: postgres:17.5
+      volumes:
+        - postgres-data:/var/lib/postgresql/data
+      env_file:
+        - .env
+      environment:
+        - POSTGRES_DB=${DB_NAME}
+        - POSTGRES_USER=${DB_USER}
+        - POSTGRES_PASSWORD=${DB_PASSWORD}
+      ports:
+        - "5434:5432"
+      healthcheck:
+        test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+      networks:
+        - inventory-network
+
+    inventory-service:
+      container_name: inventory-service
+      build:
+        context: .
+        dockerfile: Dockerfile
+      restart: unless-stopped
+      env_file:
+        - .env
+      environment:
+        - DATABASE_URL=postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      ports:
+        - "8300:8000"
+      depends_on:
+        inventory-service-db:
+          condition: service_healthy
+      volumes:
+        - ./app:/app/app
+        - ./alembic:/app/alembic
+      command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+      healthcheck:
+        test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+        start_period: 40s
+      networks:
+        - inventory-network
+
+networks:
+  inventory-network:
+    external: true
+
+volumes:
+  postgres-data:

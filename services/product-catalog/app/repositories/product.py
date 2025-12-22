@@ -81,22 +81,12 @@ def update_product(db: Session, product_id: int, dto: ProductPatch) -> Optional[
     if not product:
         return None
 
-    if dto.name is not None:
-        product.name = dto.name
-    if dto.description is not None:
-        product.description = dto.description
-    if dto.price_cents is not None:
-        product.price_cents = dto.price_cents
-    if dto.currency is not None:
-        product.currency = dto.currency
-    if dto.category is not None:
-        product.category = dto.category
-    if dto.platform is not None:
-        product.platform = dto.platform
-    if dto.is_active is not None:
-        product.is_active = bool(dto.is_active)
+    update_data = dto.model_dump(exclude_unset=True)
 
-    product.updated_at = datetime.now(timezone.utc)
+    update_data['updated_at'] = datetime.now(timezone.utc)
+
+    for field, value in update_data.items():
+        setattr(product, field, value)
 
     db.add(product)
     db.commit()
