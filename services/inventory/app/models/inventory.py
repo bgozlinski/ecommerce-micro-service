@@ -18,6 +18,6 @@ class ProductKeys(Base):
     product_id = Column(Integer, nullable=False)
     key_value = Column(String, nullable=False, unique=True)
     status = Column(String, nullable=False, default="available")
-    order_item_id = Column(Integer, nullable=False)
+    order_item_id = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(DateTime(timezone=True))
