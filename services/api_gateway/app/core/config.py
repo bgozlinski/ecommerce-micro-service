@@ -39,6 +39,8 @@ class Settings(BaseSettings):
 
     AUTH_SERVICE_URL: str = "http://auth-service:8000"
     PRODUCT_SERVICE_URL: str = "http://product-service:8000"
+    ORDER_SERVICE_URL: str = "http://order-service:8000"
+    INVENTORY_SERVICE_URL: str = "http://inventory-service:8000"
 
 
     class Config:
