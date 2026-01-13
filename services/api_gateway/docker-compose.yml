@@ -21,10 +21,16 @@ services:
       networks:
         - auth-network
         - product-network
+        - order-network
+        - inventory-network
 
 
 networks:
   auth-network:
     external: true
   product-network:
+    external: true
+  order-network:
+    external: true
+  inventory-network:
     external: true
