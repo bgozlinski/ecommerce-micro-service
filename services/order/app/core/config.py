@@ -14,6 +14,13 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
 
+    KAFKA_BOOTSTRAP_SERVERS: str = "kafka:9092"
+    KAFKA_TOPIC_ORDERS: str = "orders"
+    KAFKA_TOPIC_NOTIFICATIONS: str = "notifications"
+    KAFKA_TOPIC_REPORTING: str = "reporting"
+    KAFKA_GROUP_NOTIFICATION: str = "notification-group"
+    KAFKA_GROUP_REPORTING: str = "reporting-group"
+
     model_config = ConfigDict(env_file=".env", case_sensitive=True)
 
     @property
