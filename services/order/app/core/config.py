@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
 
+    PRODUCT_CATALOG_SERVICE_URL: str = "http://product-service:8000"
+    INVENTORY_SERVICE_URL: str = "http://inventory-service:8000"
+
     KAFKA_BOOTSTRAP_SERVERS: str = "kafka:9092"
     KAFKA_TOPIC_ORDERS: str = "orders"
     KAFKA_TOPIC_NOTIFICATIONS: str = "notifications"
