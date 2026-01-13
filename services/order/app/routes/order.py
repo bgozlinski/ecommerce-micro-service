@@ -4,6 +4,7 @@ from app.core.database import get_db
 from app.repositories import order as order_crud
 from app.schemas.order import OrderOut, CartItemOut, CartAdd
 from app.core.config import settings
+from app.models.order import Order
 
 router = APIRouter(prefix=f"{settings.API_V1_PREFIX}/orders", tags=["orders"])
 
