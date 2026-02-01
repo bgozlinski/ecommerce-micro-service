@@ -5,6 +5,16 @@ from app.core.route_wrapper import route
 router = APIRouter()
 
 @route(
+    request_method=router.get,
+    path="/inventory/{product_id}",
+    status_code=200,
+    service_url=settings.INVENTORY_SERVICE_URL,
+    authentication_required=False
+)
+async def get_inventory(request: Request, response: Response):
+    pass
+
+@route(
     request_method=router.post,
     path="/inventory/keys",
     status_code=201,
@@ -13,4 +23,15 @@ router = APIRouter()
     admin_required=True
 )
 async def add_keys(request: Request, response: Response):
+    pass
+
+@route(
+    request_method=router.post,
+    path="/inventory/confirm",
+    status_code=200,
+    service_url=settings.INVENTORY_SERVICE_URL,
+    authentication_required=True,
+    admin_required=True
+)
+async def confirm_inventory(request: Request, response: Response):
     pass

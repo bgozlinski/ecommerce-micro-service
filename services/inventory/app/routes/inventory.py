@@ -4,6 +4,7 @@ from app.core.database import get_db
 from app.repositories import inventory as inventory_crud
 from app.schemas.inventory import InventoryOut, ReserveRequest, ConfirmRequest, KeyCreate
 from app.core.config import settings
+from typing import List
 
 router = APIRouter(prefix=f"{settings.API_V1_PREFIX}/inventory", tags=["inventory"])
 
@@ -35,7 +36,6 @@ def release_stock(payload: ReserveRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Failed to release reservation")
     return {"message": "Stock released successfully"}
 
-
 @router.post("/keys", status_code=status.HTTP_201_CREATED)
 def add_keys(payload: KeyCreate, db: Session = Depends(get_db)):
     inventory, added_count = inventory_crud.add_keys(db, payload.product_id, payload.keys)
@@ -47,3 +47,7 @@ def add_keys(payload: KeyCreate, db: Session = Depends(get_db)):
         )
 
     return {"message": "Keys added successfully", "added_count": added_count}
+
+@router.post("/get-keys", response_model=List[str])
+def get_keys(order_item_ids: List[int], db: Session = Depends(get_db)):
+    return inventory_crud.get_keys_by_order_items(db, order_item_ids)

@@ -99,3 +99,9 @@ def confirm_reservation(db: Session, product_id: int, quantity: int, order_item_
 
     db.commit()
     return assigned_keys
+
+def get_keys_by_order_items(db: Session, order_item_ids: List[int]) -> List[str]:
+    keys = db.query(ProductKeys).filter(
+        ProductKeys.order_item_id.in_(order_item_ids)
+    ).all()
+    return [k.key_value for k in keys]
