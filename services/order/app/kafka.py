@@ -30,7 +30,7 @@ class KafkaProducerSingleton:
                                           retries=3,
                                           max_in_flight_requests_per_connection=1,
                                           compression_type='gzip',
-                                          request_timeout=30000, # 30s timeout
+                                          request_timeout_ms=30000, # 30s timeout
                                           )
 
         return cls._instance
@@ -46,7 +46,7 @@ class KafkaProducerSingleton:
 
 
 
-async def send_message(topic: str, payload: dict, key: Optional[str] = None):
+def send_message(topic: str, payload: dict, key: Optional[str] = None):
     try:
         producer = KafkaProducerSingleton.get_instance()
         future = producer.send(topic, value=payload, key=key)
@@ -55,7 +55,7 @@ async def send_message(topic: str, payload: dict, key: Optional[str] = None):
     except KafkaError as e:
         logger.error(f"Error sending message: {e}")
 
-async def publish_order_event(event_type: str, order_id: int, user_id: int, payload: dict):
+def publish_order_event(event_type: str, order_id: int, user_id: int, payload: dict):
     event = {
         "eventId": str(uuid.uuid4()),
         "eventType": event_type,

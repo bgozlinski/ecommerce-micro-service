@@ -5,6 +5,7 @@ from app.repositories import order as order_crud
 from app.schemas.order import OrderOut, CartItemOut, CartAdd
 from app.core.config import settings
 from app.models.order import Order
+from app.kafka import publish_order_event
 
 router = APIRouter(prefix=f"{settings.API_V1_PREFIX}/orders", tags=["orders"])
 
@@ -23,6 +24,16 @@ def checkout(x_user_id: int = Header(...), db: Session = Depends(get_db)):
 
 @router.get("/my", response_model=list[OrderOut])
 def get_my_orders(x_user_id: int = Header(...), db: Session = Depends(get_db)):
+    # logger.info(f"Getting orders for user {x_user_id}")
+    # publish_order_event(
+    #     event_type="order_created",
+    #     order_id='3123123',
+    #     user_id='1',
+    #     payload={
+    #         "totalAmount": '10_000',
+    #         "items": ['1', '2']
+    #     }
+    # )
     return db.query(Order).filter(Order.user_id == x_user_id).all()
 
 

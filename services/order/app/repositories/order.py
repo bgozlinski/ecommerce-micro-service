@@ -4,7 +4,9 @@ from app.models.order import Order, OrderItem, CartItem
 from app.core.config import settings
 from datetime import datetime, timezone
 from app.kafka import publish_order_event
+import logging
 
+logger = logging.getLogger(__name__)
 
 def get_cart_items(db: Session, user_id: int):
     return db.query(CartItem).filter(CartItem.user_id == user_id).all()
@@ -65,6 +67,8 @@ def create_order_from_cart(db: Session, user_id: int):
     db.query(CartItem).filter(CartItem.user_id == user_id).delete()
 
     db.commit()
+    logger.info(f"Order created: {order.id}")
+    logger.info('Publikuje event')
     publish_order_event(
         event_type="order_created",
         order_id=order.id,
@@ -74,6 +78,7 @@ def create_order_from_cart(db: Session, user_id: int):
             "items": [{"productId": i.product_id, "quantity": i.quantity} for i in order.items]
         }
     )
+    logger.info('Event publikowany')
     return order
 
 
