@@ -17,7 +17,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.13'
-  WORKING_DIR: '/services/api_gateway'
+  WORKING_DIR: 'services/api_gateway'
 
 
 jobs:
