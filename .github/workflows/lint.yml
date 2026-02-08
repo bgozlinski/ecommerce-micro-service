@@ -58,12 +58,12 @@ jobs:
 
 
     - name: Run mypy
-      run: poetry run mypy src
+      run: poetry run mypy app
       continue-on-error: true
 
     - name: Run Bandit
       run: |
-        poetry run bandit -r src -c pyproject.toml
+        poetry run bandit -r app -c pyproject.toml
     - name: Run Safety
       run: |
         poetry run safety check
