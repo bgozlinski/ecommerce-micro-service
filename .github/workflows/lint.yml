@@ -17,12 +17,16 @@ on:
 
 env:
   PYTHON_VERSION: '3.13'
+  WORKING_DIR: '/services/api_gateway'
 
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     name: Code Quality & Linting
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
 
     steps:
     - uses: actions/checkout@v6
