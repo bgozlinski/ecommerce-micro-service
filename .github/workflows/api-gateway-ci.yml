@@ -73,4 +73,4 @@ jobs:
 
     - name: Run Tests
       run: |
-        poetry run pytest tests
+        poetry run pytest app/tests
