@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Płatność anulowana</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 60px 40px;
+            max-width: 500px;
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .icon {
+            width: 100px;
+            height: 100px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 30px;
+            animation: scaleIn 0.6s ease-out 0.2s both;
+        }
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+        .icon svg {
+            width: 60px;
+            height: 60px;
+            stroke: white;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        h1 {
+            color: #1f2937;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        p {
+            color: #6b7280;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .order-id {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 30px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">
+            <svg viewBox="0 0 24 24">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </div>
+        <h1>Płatność anulowana</h1>
+        <p>Twoja płatność została anulowana. Zamówienie pozostaje w statusie "oczekuje na płatność".</p>
+        <div class="order-id" id="orderId">Ładowanie...</div>
+        <div class="btn-group">
+            <a href="#" class="btn btn-primary" onclick="retryPayment()">Spróbuj ponownie</a>
+            <a href="#" class="btn btn-secondary" onclick="goToOrders()">Moje zamówienia</a>
+        </div>
+    </div>
+
+    <script>
+        // Pobierz order_id z URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order_id');
+
+        if (orderId) {
+            document.getElementById('orderId').textContent = `Zamówienie #${orderId}`;
+        } else {
+            document.getElementById('orderId').textContent = 'Brak ID zamówienia';
+        }
+
+        function retryPayment() {
+            if (orderId) {
+                // Przekieruj do endpointu tworzenia płatności
+                alert(`Przekierowanie do płatności dla zamówienia #${orderId}`);
+                // W prawdziwej aplikacji: wywołaj API do utworzenia nowej płatności
+            }
+        }
+
+        function goToOrders() {
+            window.location.href = 'http://localhost:8100/api/v1/orders/my';
+        }
+    </script>
+</body>
+</html>
