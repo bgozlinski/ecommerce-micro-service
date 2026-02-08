@@ -18,7 +18,7 @@ router = APIRouter()
     path="/login",
     status_code=200,
     service_url=settings.AUTH_SERVICE_URL,
-    authentication_required=True,
+    authentication_required=False,
 
 )
 async def login(request: Request, response: Response):
