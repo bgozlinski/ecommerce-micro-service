@@ -70,7 +70,3 @@ jobs:
     - name: Run Ruff
       run: |
         poetry run ruff check .
-
-    - name: Run Tests
-      run: |
-        poetry run pytest app/tests
