@@ -5,9 +5,8 @@ mounted under a shared API prefix (e.g., `/api/v1`). Health and root endpoints
 are provided for basic diagnostics and metadata.
 """
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI
 from app.core.config import settings
-from app.core.route_wrapper import route
 from app.routes.auth import router as auth_router
 from app.routes.users import router as users_router
 from app.routes.product import router as product_router
