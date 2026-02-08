@@ -77,3 +77,4 @@ def get_order_keys(order_id: int, x_user_id: int = Header(...), db: Session = De
         raise HTTPException(status_code=500, detail="Failed to fetch keys from inventory service")
     except requests.RequestException:
         raise HTTPException(status_code=503, detail="Inventory service unavailable")
+
