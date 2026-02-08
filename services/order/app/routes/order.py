@@ -8,6 +8,9 @@ from app.models.order import Order
 from app.kafka import publish_order_event
 import requests
 from app.core.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix=f"{settings.API_V1_PREFIX}/orders", tags=["orders"])
 
@@ -38,6 +41,16 @@ def get_my_orders(x_user_id: int = Header(...), db: Session = Depends(get_db)):
     # )
     return db.query(Order).filter(Order.user_id == x_user_id).all()
 
+@router.get("/internal/{order_id}", response_model=OrderOut)
+def get_order_for_internal_services(order_id: int, db: Session = Depends(get_db)):
+    """
+    Endpoint dla komunikacji między serwisami (np. Payment Service).
+    Nie wymaga X-User-Id - zwraca zamówienie bez filtrowania po user_id.
+    """
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
 
 @router.get("/{order_id}", response_model=OrderOut)
 def get_order_details(order_id: int, x_user_id: int = Header(...), db: Session = Depends(get_db)):
@@ -77,4 +90,51 @@ def get_order_keys(order_id: int, x_user_id: int = Header(...), db: Session = De
         raise HTTPException(status_code=500, detail="Failed to fetch keys from inventory service")
     except requests.RequestException:
         raise HTTPException(status_code=503, detail="Inventory service unavailable")
+
+
+@router.post("/{order_id}/payment-status")
+def update_payment_status(
+        order_id: int,
+        status: str,
+        payment_id: str = None,
+        db: Session = Depends(get_db)
+):
+
+    if status == "success":
+        order = order_crud.update_order_status(db, order_id, "paid")
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+
+        for item in order.items:
+            try:
+                requests.post(
+                    f"{settings.INVENTORY_SERVICE_URL}/api/v1/inventory/confirm",
+                    json={"product_id": item.product_id, "quantity": item.quantity},
+                    timeout=5
+                )
+            except requests.RequestException:
+                logger.error(f"Failed to confirm reservation for product {item.product_id}")
+
+        return {"message": "Order marked as paid", "order_id": order_id}
+
+    elif status == "failed":
+        order = order_crud.update_order_status(db, order_id, "failed")
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+
+        for item in order.items:
+            try:
+                requests.post(
+                    f"{settings.INVENTORY_SERVICE_URL}/api/v1/inventory/release",
+                    json={"product_id": item.product_id, "quantity": item.quantity},
+                    timeout=5
+                )
+            except requests.RequestException:
+                logger.error(f"Failed to release reservation for product {item.product_id}")
+
+        return {"message": "Order marked as failed", "order_id": order_id}
+
+    else:
+        raise HTTPException(status_code=400, detail="Invalid status")
+
 

@@ -51,6 +51,7 @@ services:
 networks:
   auth-network:
     external: true
+    name: ecommerce-network
 
 volumes:
   postgres-data:

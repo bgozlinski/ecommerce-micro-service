@@ -52,6 +52,7 @@ services:
 networks:
   product-network:
     external: true
+    name: ecommerce-network
 
 volumes:
   postgres-data:

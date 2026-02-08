@@ -52,6 +52,7 @@ services:
 networks:
   inventory-network:
     external: true
+    name: ecommerce-network
 
 volumes:
   postgres-data:

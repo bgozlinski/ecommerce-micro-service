@@ -19,7 +19,7 @@ services:
         timeout: 5s
         retries: 5
       networks:
-        - order-network
+        - ecommerce-network  # ← Zmienione z order-network
 
     order-service:
       container_name: order-service
@@ -47,17 +47,11 @@ services:
         retries: 3
         start_period: 40s
       networks:
-        - order-network
-        - product-network
-        - inventory-network
+        - ecommerce-network
 
 networks:
-  order-network:
+  ecommerce-network:
     external: true
-  product-network:
-      external: true
-  inventory-network:
-      external: true
 
 volumes:
   postgres-data:

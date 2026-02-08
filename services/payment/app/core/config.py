@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     STRIPE_PUBLISHABLE_KEY: str
     STRIPE_WEBHOOK_SECRET: str
 
+    ORDER_SERVICE_URL: str = "http://order-service:8000"
+    FRONTEND_URL: str = "http://localhost:3000"
+
     model_config = ConfigDict(env_file=".env", case_sensitive=True)
 
     @property
