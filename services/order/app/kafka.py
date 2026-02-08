@@ -1,3 +1,10 @@
+"""Kafka producer for order-related events.
+
+This module provides a singleton Kafka producer and helper functions for
+publishing order lifecycle events (created, paid, failed, cancelled) to
+the message broker for consumption by Notification and Reporting services.
+"""
+
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
 
@@ -12,10 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 class KafkaProducerSingleton:
-    """
-    Tworzymy jeden producer na całą palikacje (thread-safe)
-
-    """
     _instance: Optional[KafkaProducer] = None
 
     @classmethod
@@ -47,6 +50,16 @@ class KafkaProducerSingleton:
 
 
 def send_message(topic: str, payload: dict, key: Optional[str] = None):
+    """Send a message to a Kafka topic.
+
+    Args:
+        topic: Kafka topic name.
+        payload: Message payload (will be JSON-serialized).
+        key: Optional message key for partitioning.
+
+    Raises:
+        KafkaError: If message delivery fails.
+    """
     try:
         producer = KafkaProducerSingleton.get_instance()
         future = producer.send(topic, value=payload, key=key)
@@ -56,6 +69,25 @@ def send_message(topic: str, payload: dict, key: Optional[str] = None):
         logger.error(f"Error sending message: {e}")
 
 def publish_order_event(event_type: str, order_id: int, user_id: int, payload: dict):
+    """Publish an order lifecycle event to Kafka.
+
+    Creates a standardized event structure with eventId, eventType, timestamp,
+    and payload, then sends it to the orders topic.
+
+    Args:
+        event_type: Event type (e.g., "order_created", "order_paid").
+        order_id: Order identifier (used as message key).
+        user_id: User who owns the order.
+        payload: Additional event-specific data.
+
+    Example:
+        publish_order_event(
+            event_type="order_paid",
+            order_id=123,
+            user_id=456,
+            payload={"paymentId": "pi_abc123"}
+        )
+    """
     event = {
         "eventId": str(uuid.uuid4()),
         "eventType": event_type,

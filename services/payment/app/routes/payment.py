@@ -1,11 +1,15 @@
-import os
+"""Payment API endpoints.
+
+This module defines REST API routes for payment processing, including
+Stripe Checkout session creation, webhook handling, and payment status queries.
+"""
+
 from fastapi import APIRouter, Depends, Request, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.config import settings
 from app.repositories import payment as payment_repo
 from app.schemas.payment import PaymentCreate, PaymentResponse
-import json
 import stripe
 import requests
 import logging
@@ -21,7 +25,33 @@ async def create_payment(
         payload: PaymentCreate,
         db: Session = Depends(get_db)
 ):
+    """Create a Stripe Checkout session for an order.
 
+    This endpoint verifies the order exists and has "awaiting_payment" status,
+    creates a payment record in the database, and generates a Stripe Checkout
+    session URL for the user to complete payment.
+
+    Workflow:
+        1. Verify order exists and status is "awaiting_payment"
+        2. Check no payment already exists for this order
+        3. Create payment record (status: pending)
+        4. Create Stripe Checkout session
+        5. Update payment with Stripe session ID
+        6. Return checkout URL
+
+    Args:
+        payload: Payment creation request containing order_id, amount, currency.
+        db: Database session dependency.
+
+    Returns:
+        PaymentResponse: Contains payment_id, checkout_url, and status.
+
+    Raises:
+        HTTPException: 404 if order not found.
+        HTTPException: 400 if order status is not "awaiting_payment" or payment exists.
+        HTTPException: 503 if Order Service is unavailable.
+        HTTPException: 500 if Stripe session creation fails.
+    """
     try:
         order_response = requests.get(
             f"{settings.ORDER_SERVICE_URL}/api/v1/orders/internal/{payload.order_id}",
@@ -98,6 +128,32 @@ async def create_payment(
 
 @router.post("/webhook")
 async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
+    """Handle Stripe webhook events.
+
+    This endpoint receives and processes webhook events from Stripe, verifying
+    the signature and handling payment completion or expiration. On successful
+    payment, it notifies the Order Service to update order status and confirm
+    inventory reservations.
+
+    Supported events:
+        - checkout.session.completed: Payment successful
+        - checkout.session.expired: Payment session expired without completion
+
+    Args:
+        request: FastAPI request object containing webhook payload and signature.
+        db: Database session dependency.
+
+    Returns:
+        dict: Status message indicating event processing result.
+
+    Raises:
+        HTTPException: 400 if payload or signature is invalid.
+
+    Notes:
+        - This endpoint does NOT require authentication (called by Stripe).
+        - Signature verification ensures request authenticity.
+        - Order Service is notified via REST API (not through API Gateway).
+    """
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
 
@@ -185,6 +241,18 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/{payment_id}")
 async def get_payment(payment_id: int, db: Session = Depends(get_db)):
+    """Retrieve payment details by ID.
+
+    Args:
+        payment_id: Payment identifier.
+        db: Database session dependency.
+
+    Returns:
+        dict: Payment details including status, amount, and Stripe reference.
+
+    Raises:
+        HTTPException: 404 if payment not found.
+    """
     payment = payment_repo.get_payment_by_id(db, payment_id)
     if not payment:
         raise HTTPException(status_code=404, detail="Payment not found")

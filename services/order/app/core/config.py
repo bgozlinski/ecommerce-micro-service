@@ -1,3 +1,9 @@
+"""Configuration settings for the Order Service.
+
+Defines application settings including database credentials, service URLs
+for inter-service communication, and Kafka configuration for event publishing.
+"""
+
 from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
 
