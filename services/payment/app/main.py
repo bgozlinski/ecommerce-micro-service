@@ -28,4 +28,4 @@ async def root():
     Returns:
         dict: Service name and version.
     """
-    return {"message": "Payment Service APII", "version": "0.1.0"}
+    return {"message": "Payment Service API", "version": "0.1.0"}
