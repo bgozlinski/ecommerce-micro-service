@@ -18,4 +18,4 @@ async def health_check():
 
 @app.get("/")
 async def root():
-    return {"message": "Order Service APIi", "version": "0.1.0"}
+    return {"message": "Order Service API", "version": "0.1.0"}
