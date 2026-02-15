@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 from app.models.notification import NotificationChannel, NotificationHistory, NotificationChannelType
 from app.schemas.notification import NotificationChannelCreate, NotificationChannelUpdate
-from fastapi import HTTPException, status
 
 
 def get_user_channels(db: Session, user_id: int) -> List[NotificationChannel]:
@@ -135,8 +134,8 @@ def get_user_email(db: Session, user_id: int) -> Optional[str]:
     primary_channel = db.query(NotificationChannel).filter(
         NotificationChannel.user_id == user_id,
         NotificationChannel.channel_type == NotificationChannelType.EMAIL,
-        NotificationChannel.is_primary == True,
-        NotificationChannel.is_active == True
+        NotificationChannel.is_primary,
+        NotificationChannel.is_active
     ).first()
     
     if primary_channel:
@@ -146,7 +145,7 @@ def get_user_email(db: Session, user_id: int) -> Optional[str]:
     any_email_channel = db.query(NotificationChannel).filter(
         NotificationChannel.user_id == user_id,
         NotificationChannel.channel_type == NotificationChannelType.EMAIL,
-        NotificationChannel.is_active == True
+        NotificationChannel.is_active
     ).first()
     
     if any_email_channel:
@@ -163,7 +162,7 @@ def save_notification_history(
     recipient: str,
     subject: Optional[str] = None,
     body: Optional[str] = None,
-    status: str = "sent",
+    notification_status: str = "sent",
     error_message: Optional[str] = None
 ) -> NotificationHistory:
     """Save notification delivery history.
@@ -191,7 +190,7 @@ def save_notification_history(
         recipient=recipient,
         subject=subject,
         body=body,
-        status=status,
+        status=notification_status,
         error_message=error_message
     )
     db.add(history)

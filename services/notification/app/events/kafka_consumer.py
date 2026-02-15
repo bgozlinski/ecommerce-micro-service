@@ -8,7 +8,6 @@ from aiokafka import AIOKafkaConsumer
 from aiokafka.errors import KafkaError
 import json
 import logging
-import asyncio
 from typing import Optional
 from app.core.config import settings
 from app.events.handlers import handle_event
@@ -29,7 +28,7 @@ class KafkaConsumerSingleton:
             AIOKafkaConsumer: Singleton consumer instance.
         """
         if cls._instance is None:
-            logger.info("Tworzę nową instancję Kafka Consumer")
+            logger.info("Creating new Kafka Consumer instance")
             
             cls._instance = AIOKafkaConsumer(
                 settings.KAFKA_TOPIC_ORDERS,
@@ -48,7 +47,7 @@ class KafkaConsumerSingleton:
             
             await cls._instance.start()
             
-            logger.info(f"Kafka Consumer subskrybuje topiki: {settings.KAFKA_TOPIC_ORDERS}, "
+            logger.info(f"Kafka Consumer subscribing to topics: {settings.KAFKA_TOPIC_ORDERS}, "
                        f"{settings.KAFKA_TOPIC_USERS}, {settings.KAFKA_TOPIC_PRODUCTS}")
         
         return cls._instance
@@ -57,10 +56,10 @@ class KafkaConsumerSingleton:
     async def close(cls):
         """Close Kafka consumer and cleanup resources."""
         if cls._instance:
-            logger.info("Zamykam KafkaConsumer")
+            logger.info("Closing KafkaConsumer")
             await cls._instance.stop()
             cls._instance = None
-            logger.info("KafkaConsumer zamknięty")
+            logger.info("KafkaConsumer closed")
 
 
 async def start_consumer():
@@ -74,12 +73,12 @@ async def start_consumer():
     """
     consumer = await KafkaConsumerSingleton.get_instance()
     
-    logger.info("Kafka Consumer uruchomiony - oczekiwanie na eventy...")
+    logger.info("Kafka Consumer started - waiting for events...")
     
     try:
         async for message in consumer:
             try:
-                logger.info(f"Otrzymano event z topiku {message.topic} "
+                logger.info(f"Received event from topic {message.topic} "
                            f"[partition {message.partition}] @ offset {message.offset}")
                 logger.debug(f"Event payload: {message.value}")
                 
@@ -87,14 +86,14 @@ async def start_consumer():
                 await handle_event(message.value)
                 
             except Exception as e:
-                logger.error(f"Błąd przetwarzania eventu: {e}", exc_info=True)
+                logger.error(f"Error processing event: {e}", exc_info=True)
                 # Continue processing next messages even if one fails
                 continue
                 
     except KeyboardInterrupt:
-        logger.info("Otrzymano sygnał przerwania - zatrzymywanie konsumenta")
+        logger.info("Received interrupt signal - stopping consumer")
     except KafkaError as e:
-        logger.error(f"Błąd Kafka Consumer: {e}", exc_info=True)
+        logger.error(f"Kafka Consumer error: {e}", exc_info=True)
         raise
     finally:
         await KafkaConsumerSingleton.close()
@@ -114,11 +113,11 @@ async def consume_single_message() -> Optional[dict]:
         for topic_partition, messages in message_batch.items():
             if messages:
                 message = messages[0]
-                logger.info(f"Otrzymano event z topiku {message.topic}")
+                logger.info(f"Received event from topic {message.topic}")
                 return message.value
         
         return None
         
     except KafkaError as e:
-        logger.error(f"Błąd podczas pobierania wiadomości: {e}")
+        logger.error(f"Error fetching message: {e}")
         return None

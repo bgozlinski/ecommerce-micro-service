@@ -31,7 +31,7 @@ async def handle_event(event: Dict[str, Any]) -> None:
     payload = event.get("payload", {})
     
     if not event_type:
-        logger.warning(f"Event bez eventType: {event}")
+        logger.warning(f"Event without eventType: {event}")
         return
     
     handlers = {
@@ -49,9 +49,9 @@ async def handle_event(event: Dict[str, Any]) -> None:
         try:
             await handler(payload)
         except Exception as e:
-            logger.error(f"Błąd obsługi eventu {event_type}: {e}", exc_info=True)
+            logger.error(f"Error handling event {event_type}: {e}", exc_info=True)
     else:
-        logger.warning(f"Brak handlera dla eventu: {event_type}")
+        logger.warning(f"No handler for event: {event_type}")
 
 
 async def handle_user_registered(payload: Dict[str, Any]) -> None:
@@ -64,10 +64,10 @@ async def handle_user_registered(payload: Dict[str, Any]) -> None:
     email = payload.get("email")
     
     if not email or not user_id:
-        logger.warning(f"Brak email lub userId w evencie user_registered: {payload}")
+        logger.warning(f"Missing email or userId in user_registered event: {payload}")
         return
     
-    logger.info(f"Obsługa user_registered dla userId={user_id}, email={email}")
+    logger.info(f"Handling user_registered for userId={user_id}, email={email}")
     
     db = SessionLocal()
     try:
@@ -87,12 +87,12 @@ async def handle_user_registered(payload: Dict[str, Any]) -> None:
         )
         
         if success:
-            logger.info(f"Email powitalny wysłany do {email}")
+            logger.info(f"Welcome email sent to {email}")
         else:
-            logger.error(f"Nie udało się wysłać emaila powitalnego do {email}")
+            logger.error(f"Failed to send welcome email to {email}")
             
     except Exception as e:
-        logger.error(f"Błąd podczas obsługi user_registered: {e}", exc_info=True)
+        logger.error(f"Error handling user_registered: {e}", exc_info=True)
     finally:
         db.close()
 
@@ -108,17 +108,17 @@ async def handle_order_created(payload: Dict[str, Any]) -> None:
     total_amount = payload.get("totalAmount", 0) / 100  # cents to PLN
     
     if not order_id or not user_id:
-        logger.warning(f"Brak orderId lub userId w evencie order_created: {payload}")
+        logger.warning(f"Missing orderId or userId in order_created event: {payload}")
         return
     
-    logger.info(f"Obsługa order_created dla orderId={order_id}, userId={user_id}")
+    logger.info(f"Handling order_created for orderId={order_id}, userId={user_id}")
     
     db = SessionLocal()
     try:
         # Get user email
         email = get_user_email(db, user_id)
         if not email:
-            logger.warning(f"Brak emaila dla userId={user_id}")
+            logger.warning(f"No email found for userId={user_id}")
             return
         
         # Send order confirmation
@@ -137,12 +137,12 @@ async def handle_order_created(payload: Dict[str, Any]) -> None:
         )
         
         if success:
-            logger.info(f"Email potwierdzenia zamówienia wysłany do {email}")
+            logger.info(f"Order confirmation email sent to {email}")
         else:
-            logger.error(f"Nie udało się wysłać emaila potwierdzenia do {email}")
+            logger.error(f"Failed to send order confirmation email to {email}")
             
     except Exception as e:
-        logger.error(f"Błąd podczas obsługi order_created: {e}", exc_info=True)
+        logger.error(f"Error handling order_created: {e}", exc_info=True)
     finally:
         db.close()
 
@@ -158,17 +158,17 @@ async def handle_order_paid(payload: Dict[str, Any]) -> None:
     keys = payload.get("keys", [])
     
     if not order_id or not user_id:
-        logger.warning(f"Brak orderId lub userId w evencie order_paid: {payload}")
+        logger.warning(f"Missing orderId or userId in order_paid event: {payload}")
         return
     
-    logger.info(f"Obsługa order_paid dla orderId={order_id}, userId={user_id}, keys={len(keys)}")
+    logger.info(f"Handling order_paid for orderId={order_id}, userId={user_id}, keys={len(keys)}")
     
     db = SessionLocal()
     try:
         # Get user email
         email = get_user_email(db, user_id)
         if not email:
-            logger.warning(f"Brak emaila dla userId={user_id}")
+            logger.warning(f"No email found for userId={user_id}")
             return
         
         # Send payment confirmation with keys
@@ -188,9 +188,9 @@ async def handle_order_paid(payload: Dict[str, Any]) -> None:
         )
         
         if success:
-            logger.info(f"Email z kluczami wysłany do {email}")
+            logger.info(f"Email with keys sent to {email}")
         else:
-            logger.error(f"Nie udało się wysłać emaila z kluczami do {email}")
+            logger.error(f"Failed to send email with keys to {email}")
         
         # Send Discord notification if configured
         if settings.DISCORD_WEBHOOK_URL:
@@ -201,12 +201,12 @@ async def handle_order_paid(payload: Dict[str, Any]) -> None:
             )
             
             if discord_success:
-                logger.info(f"Powiadomienie Discord wysłane dla orderId={order_id}")
+                logger.info(f"Discord notification sent for orderId={order_id}")
             else:
-                logger.error(f"Nie udało się wysłać powiadomienia Discord")
+                logger.error("Failed to send Discord notification")
                 
     except Exception as e:
-        logger.error(f"Błąd podczas obsługi order_paid: {e}", exc_info=True)
+        logger.error(f"Error handling order_paid: {e}", exc_info=True)
     finally:
         db.close()
 
@@ -222,17 +222,17 @@ async def handle_order_failed(payload: Dict[str, Any]) -> None:
     reason = payload.get("reason", "Unknown error")
     
     if not order_id or not user_id:
-        logger.warning(f"Brak orderId lub userId w evencie order_failed: {payload}")
+        logger.warning(f"Missing orderId or userId in order_failed event: {payload}")
         return
     
-    logger.info(f"Obsługa order_failed dla orderId={order_id}, userId={user_id}")
+    logger.info(f"Handling order_failed for orderId={order_id}, userId={user_id}")
     
     db = SessionLocal()
     try:
         # Get user email
         email = get_user_email(db, user_id)
         if not email:
-            logger.warning(f"Brak emaila dla userId={user_id}")
+            logger.warning(f"No email found for userId={user_id}")
             return
         
         # Send failure notification
@@ -252,12 +252,12 @@ async def handle_order_failed(payload: Dict[str, Any]) -> None:
         )
         
         if success:
-            logger.info(f"Email o niepowodzeniu zamówienia wysłany do {email}")
+            logger.info(f"Order failure email sent to {email}")
         else:
-            logger.error(f"Nie udało się wysłać emaila o niepowodzeniu do {email}")
+            logger.error(f"Failed to send order failure email to {email}")
             
     except Exception as e:
-        logger.error(f"Błąd podczas obsługi order_failed: {e}", exc_info=True)
+        logger.error(f"Error handling order_failed: {e}", exc_info=True)
     finally:
         db.close()
 
@@ -272,10 +272,10 @@ async def handle_order_cancelled(payload: Dict[str, Any]) -> None:
     user_id = payload.get("userId")
     
     if not order_id or not user_id:
-        logger.warning(f"Brak orderId lub userId w evencie order_cancelled: {payload}")
+        logger.warning(f"Missing orderId or userId in order_cancelled event: {payload}")
         return
     
-    logger.info(f"Obsługa order_cancelled dla orderId={order_id}, userId={user_id}")
+    logger.info(f"Handling order_cancelled for orderId={order_id}, userId={user_id}")
     
     # Treat cancellation similar to failure
     await handle_order_failed({
@@ -292,7 +292,7 @@ async def handle_product_created(payload: Dict[str, Any]) -> None:
         payload: Event payload containing productId, name, price.
     """
     product_id = payload.get("productId")
-    logger.info(f"Otrzymano event product_created dla productId={product_id} - brak akcji")
+    logger.info(f"Received product_created event for productId={product_id} - no action needed")
 
 
 async def handle_product_updated(payload: Dict[str, Any]) -> None:
@@ -302,4 +302,4 @@ async def handle_product_updated(payload: Dict[str, Any]) -> None:
         payload: Event payload containing productId, changes.
     """
     product_id = payload.get("productId")
-    logger.info(f"Otrzymano event product_updated dla productId={product_id} - brak akcji")
+    logger.info(f"Received product_updated event for productId={product_id} - no action needed")

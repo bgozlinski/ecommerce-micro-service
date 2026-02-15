@@ -4,7 +4,7 @@ This module defines data validation and serialization schemas for notification
 channel management and notification history.
 """
 
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
 from app.models.notification import NotificationChannelType
