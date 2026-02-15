@@ -16,5 +16,5 @@ def test_root_endpoint():
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert "messagee" in data
+    assert "message" in data
     assert data["version"] == "0.1.0"
