@@ -33,9 +33,9 @@ jobs:
       postgres:
         image: postgres:17.5
         env:
-          POSTGRES_PASSWORD: ${{ secrets.AUTH_DB_PASSWORD }}
-          POSTGRES_USER: ${{ vars.AUTH_DB_USER }}
-          POSTGRES_NAME: ${{ vars.AUTH_DB_NAME }}
+          POSTGRES_PASSWORD: ${{ secrets.INVENTORY_DB_PASSWORD }}
+          POSTGRES_USER: ${{ vars.INVENTORY_DB_USER }}
+          POSTGRES_NAME: ${{ vars.INVENTORY_DB_NAME }}
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -85,14 +85,14 @@ jobs:
         continue-on-error: true
       - name: Run Ruff
         run: |
-          poetry run ruff check .
+          poetry run ruff check . --exclude alembic
 
       - name: Run Tests
         run: |
           poetry run pytest app/tests
         env:
-          DB_NAME: ${{ vars.AUTH_DB_NAME }}
-          DB_HOST: ${{ vars.AUTH_DB_HOST }}
-          DB_PORT: ${{ vars.AUTH_DB_PORT }}
-          DB_PASSWORD: ${{ secrets.AUTH_DB_PASSWORD }}
-          DB_USER: ${{ vars.AUTH_DB_USER }}
+          DB_NAME: ${{ vars.INVENTORY_DB_NAME }}
+          DB_HOST: ${{ vars.INVENTORY_DB_HOST }}
+          DB_PORT: ${{ vars.INVENTORY_DB_PORT }}
+          DB_PASSWORD: ${{ secrets.INVENTORY_DB_PASSWORD }}
+          DB_USER: ${{ vars.INVENTORY_DB_USER }}

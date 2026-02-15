@@ -4,7 +4,7 @@ from sqlalchemy import pool
 from alembic import context
 from app.core.config import settings
 from app.core.database import Base
-from app.models.inventory import Inventory, ProductKeys
+from app.models.inventory import ProductKeys, Inventory
 
 config = context.config
 
