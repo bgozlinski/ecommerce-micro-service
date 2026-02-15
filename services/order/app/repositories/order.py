@@ -195,7 +195,8 @@ def cancel_order(db: Session, order_id: int, user_id: int):
 
     for item in order.items:
         requests.post(f"{settings.INVENTORY_SERVICE_URL}/api/v1/inventory/release",
-                      json={"product_id": item.product_id, "quantity": item.quantity})
+                      json={"product_id": item.product_id, "quantity": item.quantity},
+                      timeout=5)
 
     db.commit()
     publish_order_event(
