@@ -58,8 +58,8 @@ class Settings(BaseSettings):
 
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
-    SMTP_USER: str
-    SMTP_PASSWORD: str
+    SMTP_USER: str = "test@example.com"
+    SMTP_PASSWORD: str = "test_password"
     SMTP_FROM_EMAIL: str = "noreply@gamekeys.com"
     SMTP_FROM_NAME: str = "GameKeys Store"
 
