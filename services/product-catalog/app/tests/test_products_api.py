@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from fastapi.testclient import TestClient
@@ -18,7 +18,6 @@ from app.main import app
 from app.core.database import Base
 from app.core import database as db_module
 from app.models.product import Product
-from datetime import datetime, timezone
 
 
 @pytest.fixture()
