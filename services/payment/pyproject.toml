@@ -27,7 +27,15 @@ mypy = "^1.19.1"
 ruff = "^0.15.0"
 safety = "^3.7.0"
 
+[tool.pytest.ini_options]
+testpaths = ["app/tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
 
+[tool.bandit]
+exclude_dirs = ["app/tests", "alembic"]
+skips = ["B101"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
