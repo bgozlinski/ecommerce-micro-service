@@ -1,4 +1,4 @@
-name: Inventory - Lint
+name: Notification - Lint
 
 on:
   push:

@@ -1,4 +1,4 @@
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pathlib import Path
 from app.core.config import settings
 import logging
@@ -6,7 +6,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 template_dir = Path(__file__).parent.parent / "templates"
-jinja_env = Environment(loader=FileSystemLoader(template_dir))
+jinja_env = Environment(
+    loader=FileSystemLoader(template_dir),
+    autoescape=select_autoescape(['html', 'xml'])
+)
 
 
 async def send_email(to_email: str, subject: str, template_name: str, context: dict):
