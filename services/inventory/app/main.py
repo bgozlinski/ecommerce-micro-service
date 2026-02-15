@@ -11,4 +11,4 @@ async def health_check():
 
 @app.get("/")
 async def root():
-    return {"messagee": "Inventory Service API", "version": "0.1.0"}
+    return {"message": "Inventory Service API", "version": "0.1.0"}
