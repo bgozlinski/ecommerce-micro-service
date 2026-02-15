@@ -92,7 +92,7 @@ jobs:
           poetry run pytest app/tests
         env:
           DB_NAME: ${{ vars.PAYMENT_DB_NAME }}
-          DB_HOST: ${{ vars.PAYEMNT_DB_HOST }}
-          DB_PORT: ${{ vars.PAYEMNT_DB_PORT }}
+          DB_HOST: ${{ vars.PAYMENT_DB_HOST }}
+          DB_PORT: ${{ vars.PAYMENT_DB_PORT }}
           DB_PASSWORD: ${{ secrets.PAYMENT_DB_PASSWORD }}
           DB_USER: ${{ vars.PAYMENT_DB_USER }}
