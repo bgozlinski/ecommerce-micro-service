@@ -5,7 +5,6 @@ API endpoints, ensuring type safety and validation.
 """
 
 from pydantic import BaseModel
-from typing import Optional
 
 class PaymentCreate(BaseModel):
     """Request schema for creating a new payment.
