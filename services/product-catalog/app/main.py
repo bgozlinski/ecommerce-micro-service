@@ -18,7 +18,7 @@ async def health_check():
     Returns:
         dict: Service health status.
     """
-    return {"status": "healthy", "service": "product-service"}
+    return {"status": "healthy", "service": "product-catalog-service"}
 
 @app.get("/")
 async def root():

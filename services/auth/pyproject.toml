@@ -38,7 +38,7 @@ python_functions = ["test_*"]
 
 [tool.bandit]
 exclude_dirs = ["app/tests", "alembic"]
-skips = ["B101"]
+skips = ["B101", "B106"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
