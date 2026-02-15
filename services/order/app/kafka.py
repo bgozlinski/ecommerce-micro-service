@@ -10,7 +10,7 @@ from kafka.errors import KafkaError
 
 import json
 import logging
-from typing import Any, Optional
+from typing import Optional
 from .core.config import settings
 import uuid
 from datetime import datetime, timezone

@@ -11,9 +11,7 @@ from app.repositories import order as order_crud
 from app.schemas.order import OrderOut, CartItemOut, CartAdd
 from app.core.config import settings
 from app.models.order import Order
-from app.kafka import publish_order_event
 import requests
-from app.core.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
