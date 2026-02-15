@@ -43,9 +43,9 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
 
-    STRIPE_SECRET_KEY: str
-    STRIPE_PUBLISHABLE_KEY: str
-    STRIPE_WEBHOOK_SECRET: str
+    STRIPE_SECRET_KEY: str = "sk_test_mock_secret_key"
+    STRIPE_PUBLISHABLE_KEY: str = "pk_test_mock_publishable_key"
+    STRIPE_WEBHOOK_SECRET: str = "whsec_test_mock_webhook_secret"
 
     ORDER_SERVICE_URL: str = "http://order-service:8000"
     FRONTEND_URL: str = "http://localhost:3000"
