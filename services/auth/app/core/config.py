@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     DB_PORT: str = "5432"
     DB_NAME: str
 
-    JWT_SECRET_KEY: str
+    JWT_SECRET_KEY: str = "test_secret_key_for_development_only_change_in_production"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
