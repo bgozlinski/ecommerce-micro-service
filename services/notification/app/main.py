@@ -7,7 +7,7 @@ app.include_router(notification_router)
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "inventory-service"}
+    return {"status": "healthy", "service": "notification-service"}
 
 @app.get("/")
 async def root():
