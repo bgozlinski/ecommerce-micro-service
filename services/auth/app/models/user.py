@@ -5,7 +5,7 @@ administrators) with authentication and authorization attributes.
 """
 
 from app.core.database import Base
-from sqlalchemy import Column, Integer, String, Boolean, Text, func, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, func, DateTime
 
 class User(Base):
     """User account record.

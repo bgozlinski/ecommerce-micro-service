@@ -1,8 +1,6 @@
 import os
 from typing import Tuple
 
-import pytest
-
 os.environ.setdefault("DB_USER", "test")
 os.environ.setdefault("DB_PASSWORD", "test")
 os.environ.setdefault("DB_HOST", "localhost")

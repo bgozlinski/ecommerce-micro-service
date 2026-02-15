@@ -4,8 +4,6 @@ This module defines REST API routes for user management operations, including
 user registration, retrieval, updates, and deletion.
 """
 
-from http.client import responses
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
