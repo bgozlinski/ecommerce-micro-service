@@ -8,7 +8,7 @@ from sqlalchemy.pool import StaticPool
 
 
 def _ensure_service_root_on_syspath():
-    service_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+    service_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if service_root not in sys.path:
         sys.path.insert(0, service_root)
 
