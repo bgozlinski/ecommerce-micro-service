@@ -17,7 +17,7 @@ async def read_products(
     platform: str | None = Query(None),
     min_price_cents: int | None = Query(None, ge=0),
     max_price_cents: int | None = Query(None, ge=0),
-    is_active: bool | None = Query(None),
+    is_active: bool | None = Query(True),
     search: str | None = Query(None, min_length=1),
     sort_by: str = Query("created_at", pattern="^(created_at|updated_at|price_cents|name|id)$"),
     sort_dir: str = Query("desc", pattern="^(asc|desc)$"),
