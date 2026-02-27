@@ -20,6 +20,7 @@ dependencies = [
     "bcrypt (==3.2.2)",
     "PyJWT (>=2.9.0,<3.0.0)",
     "pytest (>=9.0.2,<10.0.0)",
+    "kafka-python (>=2.0.2,<3.0.0)",
 ]
 
 

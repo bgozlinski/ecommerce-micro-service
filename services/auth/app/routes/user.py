@@ -10,6 +10,7 @@ from app.core.database import get_db
 from app.repositories import user as user_crud
 from app.schemas.user import UserCreate, UserResponse, UserCreateResponse, UserDeleteResponse, UserPatch
 from app.core.config import settings
+from app.kafka import publish_user_registered
 
 router = APIRouter(prefix=settings.API_V1_PREFIX)
 
@@ -83,6 +84,7 @@ async def register(user_create: UserCreate, db: Session = Depends(get_db)):
         HTTPException: 400 if email is already registered.
     """
     user = user_crud.create_user(db=db, user=user_create)
+    publish_user_registered(user_id=user.id, email=user.email)
     return UserCreateResponse(user=UserResponse.model_validate(user))
 
 @router.patch("/users/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)

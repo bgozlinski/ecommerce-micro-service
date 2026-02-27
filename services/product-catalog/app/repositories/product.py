@@ -1,3 +1,9 @@
+"""Repository layer for product catalog database operations.
+
+This module provides data access functions for product CRUD operations,
+filtering, and sorting.
+"""
+
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from app.models.product import Product
@@ -5,6 +11,15 @@ from app.schemas.product import ProductCreate, ProductPatch
 from datetime import datetime, timezone
 
 def get_product_by_id(db: Session, product_id: int) -> Optional[Product]:
+    """Retrieve a single product by its unique identifier.
+
+    Args:
+        db: Database session.
+        product_id: Product ID.
+
+    Returns:
+        Optional[Product]: Product record or None.
+    """
     return db.query(Product).filter(Product.id == product_id).first()
 
 def get_products(
@@ -59,6 +74,15 @@ def get_products(
     return q.offset(skip).limit(limit).all()
 
 def create_product(db: Session, product: ProductCreate) -> Product:
+    """Create a new product record.
+
+    Args:
+        db: Database session.
+        product: Validated product data.
+
+    Returns:
+        Product: Created product record.
+    """
     db_product = Product(**product.model_dump())
     db.add(db_product)
     db.commit()
@@ -66,6 +90,15 @@ def create_product(db: Session, product: ProductCreate) -> Product:
     return db_product
 
 def delete_product(db: Session, product_id: int) -> bool:
+    """Soft-delete a product by setting its is_active status to False.
+
+    Args:
+        db: Database session.
+        product_id: Product ID.
+
+    Returns:
+        bool: True if product was deactivated, False otherwise.
+    """
     product = get_product_by_id(db, product_id)
     if not product:
         return False
@@ -77,6 +110,16 @@ def delete_product(db: Session, product_id: int) -> bool:
 
 
 def update_product(db: Session, product_id: int, dto: ProductPatch) -> Optional[Product]:
+    """Update a product's fields with provided data.
+
+    Args:
+        db: Database session.
+        product_id: Product ID.
+        dto: Partial product update data.
+
+    Returns:
+        Optional[Product]: Updated product record or None.
+    """
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
         return None

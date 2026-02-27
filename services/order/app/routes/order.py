@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.repositories import order as order_crud
-from app.schemas.order import OrderOut, CartItemOut, CartAdd
+from app.schemas.order import OrderOut, CartItemOut, CartAdd, CartPatch, PaymentStatusUpdate
 from app.core.config import settings
 from app.models.order import Order
 import requests
@@ -17,6 +17,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix=f"{settings.API_V1_PREFIX}/orders", tags=["orders"])
+
+@router.get("/cart", response_model=list[CartItemOut])
+def get_cart(x_user_id: int = Header(...), db: Session = Depends(get_db)):
+    """Retrieve all items in the user's shopping cart.
+
+    Args:
+        x_user_id: User ID from gateway header.
+        db: Database session dependency.
+
+    Returns:
+        list[CartItemOut]: List of cart items.
+    """
+    return order_crud.get_cart_items(db, x_user_id)
+
 
 @router.post("/cart", response_model=CartItemOut)
 def add_to_cart(payload: CartAdd, x_user_id: int = Header(...), db: Session = Depends(get_db)):
@@ -31,6 +45,46 @@ def add_to_cart(payload: CartAdd, x_user_id: int = Header(...), db: Session = De
         CartItemOut: Updated cart item with total quantity.
     """
     return order_crud.add_to_cart(db, x_user_id, payload.product_id, payload.quantity)
+
+
+@router.patch("/cart/{item_id}", response_model=CartItemOut)
+def update_cart_item(item_id: int, payload: CartPatch, x_user_id: int = Header(...), db: Session = Depends(get_db)):
+    """Update quantity of a cart item.
+
+    Args:
+        item_id: Cart item identifier.
+        payload: New quantity.
+        x_user_id: User ID from gateway header.
+        db: Database session dependency.
+
+    Returns:
+        CartItemOut: Updated cart item.
+
+    Raises:
+        HTTPException: 404 if cart item not found.
+    """
+    item = order_crud.update_cart_item(db, x_user_id, item_id, payload.quantity)
+    if not item:
+        raise HTTPException(status_code=404, detail="Cart item not found")
+    return item
+
+
+@router.delete("/cart/{item_id}", status_code=204)
+def delete_cart_item(item_id: int, x_user_id: int = Header(...), db: Session = Depends(get_db)):
+    """Remove an item from the shopping cart.
+
+    Args:
+        item_id: Cart item identifier.
+        x_user_id: User ID from gateway header.
+        db: Database session dependency.
+
+    Raises:
+        HTTPException: 404 if cart item not found.
+    """
+    deleted = order_crud.delete_cart_item(db, x_user_id, item_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Cart item not found")
+    return None
 
 
 @router.post("/checkout", response_model=OrderOut)
@@ -168,8 +222,7 @@ def get_order_keys(order_id: int, x_user_id: int = Header(...), db: Session = De
 @router.post("/{order_id}/payment-status")
 def update_payment_status(
         order_id: int,
-        status: str,
-        payment_id: str = None,
+        payload: PaymentStatusUpdate,
         db: Session = Depends(get_db)
 ):
     """Update order status after payment completion.
@@ -180,8 +233,7 @@ def update_payment_status(
 
     Args:
         order_id: Order identifier.
-        status: Payment status ("success" or "failed").
-        payment_id: Stripe payment ID. Optional.
+        payload: Payment status details (status and optional payment_id).
         db: Database session dependency.
 
     Returns:
@@ -195,25 +247,32 @@ def update_payment_status(
         - Does NOT require X-User-Id header (service-to-service call).
         - Publishes "order_paid" or "order_failed" event to Kafka.
     """
+    logger.info(f"Received internal payment status update for order {order_id}. Status: {payload.status}")
 
-    if status == "success":
-        order = order_crud.update_order_status(db, order_id, "paid")
+    if payload.status == "success":
+        order = order_crud.update_order_status(db, order_id, "paid", payload.payment_id)
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
 
         for item in order.items:
             try:
-                requests.post(
+                resp = requests.post(
                     f"{settings.INVENTORY_SERVICE_URL}/api/v1/inventory/confirm",
-                    json={"product_id": item.product_id, "quantity": item.quantity},
+                    json={
+                        "product_id": item.product_id,
+                        "quantity": item.quantity,
+                        "order_item_ids": [item.id] * item.quantity
+                    },
                     timeout=5
                 )
-            except requests.RequestException:
-                logger.error(f"Failed to confirm reservation for product {item.product_id}")
+                if resp.status_code != 200:
+                    logger.error(f"Inventory confirmation failed for order {order_id}, product {item.product_id}: {resp.text}")
+            except requests.RequestException as e:
+                logger.error(f"Failed to confirm reservation for product {item.product_id}: {str(e)}")
 
         return {"message": "Order marked as paid", "order_id": order_id}
 
-    elif status == "failed":
+    elif payload.status == "failed":
         order = order_crud.update_order_status(db, order_id, "failed")
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")

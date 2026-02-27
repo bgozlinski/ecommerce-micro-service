@@ -33,6 +33,7 @@ async def register(request: Request, response: Response):
     status_code=200,
     service_url=settings.AUTH_SERVICE_URL,
     authentication_required=True,
+    admin_required=True,
 )
 async def list_users(request: Request, response: Response):
     pass
@@ -43,6 +44,7 @@ async def list_users(request: Request, response: Response):
     status_code=200,
     service_url=settings.AUTH_SERVICE_URL,
     authentication_required=True,
+    admin_required=True,
 )
 async def get_user_by_id(request: Request, response: Response):
     pass
@@ -53,6 +55,7 @@ async def get_user_by_id(request: Request, response: Response):
     status_code=200,
     service_url=settings.AUTH_SERVICE_URL,
     authentication_required=True,
+    admin_required=True,
 )
 async def delete_user(request: Request, response: Response):
     pass

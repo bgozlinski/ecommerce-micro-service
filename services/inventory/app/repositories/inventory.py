@@ -1,3 +1,8 @@
+"""Repository layer for inventory management database operations.
+
+This module provides functions for managing stock levels and digital license keys.
+"""
+
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from typing import List, Optional
@@ -5,9 +10,28 @@ from app.models.inventory import Inventory, ProductKeys
 from datetime import datetime, timezone
 
 def get_inventory_by_product_id(db: Session, product_id: int) -> Optional[Inventory]:
+    """Retrieve inventory summary for a given product.
+
+    Args:
+        db: Database session.
+        product_id: ID of the product.
+
+    Returns:
+        Optional[Inventory]: Inventory summary or None if not found.
+    """
     return db.query(Inventory).filter(and_(Inventory.product_id == product_id)).first()
 
 def add_keys(db: Session, product_id: int, keys: List[str]) -> tuple[Optional[Inventory], int]:
+    """Batch add digital license keys for a product and update stock.
+
+    Args:
+        db: Database session.
+        product_id: ID of the product.
+        keys: List of unique key strings to add.
+
+    Returns:
+        tuple: (updated_inventory_record, count_of_added_keys).
+    """
     existing_keys = db.query(ProductKeys).filter(
         ProductKeys.key_value.in_(keys)
     ).all()
@@ -34,6 +58,16 @@ def add_keys(db: Session, product_id: int, keys: List[str]) -> tuple[Optional[In
     return inventory, len(new_keys)
 
 def reserve_stock(db: Session, product_id: int, quantity: int) -> bool:
+    """Reserve digital license keys for a pending order.
+
+    Args:
+        db: Database session.
+        product_id: ID of the product.
+        quantity: Number of keys to reserve.
+
+    Returns:
+        bool: True if reservation succeeded, False otherwise.
+    """
     inventory = get_inventory_by_product_id(db, product_id)
     if not inventory or inventory.available_qty < quantity:
         return False
@@ -58,6 +92,16 @@ def reserve_stock(db: Session, product_id: int, quantity: int) -> bool:
     return True
 
 def release_stock(db: Session, product_id: int, quantity: int) -> bool:
+    """Release a previously made stock reservation.
+
+    Args:
+        db: Database session.
+        product_id: ID of the product.
+        quantity: Number of keys to release back to 'available' status.
+
+    Returns:
+        bool: True if release succeeded, False otherwise.
+    """
     inventory = get_inventory_by_product_id(db, product_id)
     if not inventory or inventory.reserved_qty < quantity:
         return False
@@ -78,6 +122,17 @@ def release_stock(db: Session, product_id: int, quantity: int) -> bool:
     return True
 
 def confirm_reservation(db: Session, product_id: int, quantity: int, order_item_ids: List[int]) -> List[str]:
+    """Confirm a stock reservation by assigning keys to specific order items.
+
+    Args:
+        db: Database session.
+        product_id: ID of the product.
+        quantity: Number of keys to confirm.
+        order_item_ids: IDs of order items to assign keys to.
+
+    Returns:
+        List[str]: List of key values confirmed and assigned.
+    """
     inventory = get_inventory_by_product_id(db, product_id)
     if not inventory or inventory.reserved_qty < quantity:
         return []
@@ -101,6 +156,15 @@ def confirm_reservation(db: Session, product_id: int, quantity: int, order_item_
     return assigned_keys
 
 def get_keys_by_order_items(db: Session, order_item_ids: List[int]) -> List[str]:
+    """Retrieve all keys currently assigned to a set of order items.
+
+    Args:
+        db: Database session.
+        order_item_ids: List of order item IDs.
+
+    Returns:
+        List[str]: List of license key values.
+    """
     keys = db.query(ProductKeys).filter(
         ProductKeys.order_item_id.in_(order_item_ids)
     ).all()

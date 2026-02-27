@@ -118,7 +118,12 @@
     </div>
 
     <script>
-        // Pobierz session_id z URL
+        const API_BASE = window.location.hostname === 'localhost'
+            ? 'http://localhost:8100'
+            : `${window.location.protocol}//${window.location.hostname}:8100`;
+        const API = API_BASE + '/api/v1';
+        const token = localStorage.getItem('token');
+
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
 
@@ -128,9 +133,34 @@
             document.getElementById('sessionId').textContent = 'Brak session ID';
         }
 
+        async function verifyPayment() {
+            if (!token) return;
+            try {
+                const ordersRes = await fetch(`${API}/orders/my`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!ordersRes.ok) return;
+                const orders = await ordersRes.json();
+                const awaitingOrders = orders.filter(o => o.status === 'awaiting_payment');
+                for (const order of awaitingOrders) {
+                    try {
+                        await fetch(`${API}/payments/verify/${order.id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                    } catch (e) { /* ignore */ }
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        verifyPayment();
+
         function goToOrders() {
-            // Przekieruj do strony zamówień (dostosuj URL do swojego frontendu)
-            window.location.href = 'http://localhost:8100/api/v1/orders/my';
+            const frontendUrl = window.location.origin;
+            window.location.href = `${frontendUrl}?view=orders`;
         }
     </script>
 </body>

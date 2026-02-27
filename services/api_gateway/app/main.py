@@ -6,21 +6,34 @@ are provided for basic diagnostics and metadata.
 """
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.routes.auth import router as auth_router
 from app.routes.users import router as users_router
 from app.routes.product import router as product_router
 from app.routes.order import router as order_router
+from app.routes.reporting import router as reporting_router
+from app.routes.notification import router as notification_router
 from app.routes.inventory import router as inventory_router
 from app.routes.payment import router as payment_router
 
 app = FastAPI(title=settings.PROJECT_NAME)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth_router, prefix=settings.API_V1_PREFIX, tags=["auth"])
 app.include_router(users_router, prefix=settings.API_V1_PREFIX, tags=["users"])
 app.include_router(product_router, prefix=settings.API_V1_PREFIX, tags=["product-catalog"])
 app.include_router(inventory_router, prefix=settings.API_V1_PREFIX, tags=["inventory"])
 app.include_router(order_router, prefix=settings.API_V1_PREFIX, tags=["orders"])
+app.include_router(reporting_router, prefix=settings.API_V1_PREFIX, tags=["reporting"])
+app.include_router(notification_router, prefix=settings.API_V1_PREFIX, tags=["notification"])
 app.include_router(payment_router, prefix=settings.API_V1_PREFIX, tags=["payments"])
 
 @app.get("/health")

@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
 
+    # Kafka
+    KAFKA_BOOTSTRAP_SERVERS: str = "kafka:29092"
+    KAFKA_TOPIC_PRODUCTS: str = "products"
+
     model_config = ConfigDict(env_file=".env", case_sensitive=True)
 
     @property

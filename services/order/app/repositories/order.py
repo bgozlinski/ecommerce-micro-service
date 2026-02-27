@@ -50,6 +50,46 @@ def add_to_cart(db: Session, user_id: int, product_id: int, quantity: int):
     return item
 
 
+def update_cart_item(db: Session, user_id: int, item_id: int, quantity: int):
+    """Update quantity of a cart item.
+
+    Args:
+        db: Database session.
+        user_id: User identifier.
+        item_id: Cart item identifier.
+        quantity: New quantity.
+
+    Returns:
+        CartItem: Updated cart item, or None if not found.
+    """
+    item = db.query(CartItem).filter(CartItem.id == item_id, CartItem.user_id == user_id).first()
+    if not item:
+        return None
+    item.quantity = quantity
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+def delete_cart_item(db: Session, user_id: int, item_id: int):
+    """Remove an item from the user's cart.
+
+    Args:
+        db: Database session.
+        user_id: User identifier.
+        item_id: Cart item identifier.
+
+    Returns:
+        bool: True if deleted, False if not found.
+    """
+    item = db.query(CartItem).filter(CartItem.id == item_id, CartItem.user_id == user_id).first()
+    if not item:
+        return False
+    db.delete(item)
+    db.commit()
+    return True
+
+
 def create_order_from_cart(db: Session, user_id: int):
     """Create an order from the user's cart items.
 
@@ -130,13 +170,14 @@ def create_order_from_cart(db: Session, user_id: int):
     return order
 
 
-def update_order_status(db: Session, order_id: int, status: str):
+def update_order_status(db: Session, order_id: int, status: str, payment_id: str = None):
     """Update order status and publish corresponding event.
 
     Args:
         db: Database session.
         order_id: Order identifier.
         status: New order status ("paid", "failed", "cancelled").
+        payment_id: External payment identifier. Optional.
 
     Returns:
         Order: Updated order, or None if not found.
@@ -149,14 +190,19 @@ def update_order_status(db: Session, order_id: int, status: str):
     if not order:
         return None
 
+    logger.info(f"Updating order {order_id} status from {order.status} to {status}")
     order.status = status
     if status == "paid":
         order.paid_at = datetime.now(timezone.utc)
+        logger.info(f"Order {order_id} marked as paid at {order.paid_at}")
         publish_order_event(
             event_type="order_paid",
             order_id=order.id,
             user_id=order.user_id,
-            payload={"paymentId": "MOCK_PAYMENT_ID"}
+            payload={
+                "paymentId": payment_id or "UNKNOWN",
+                "totalAmount": order.total_amount_cents
+            }
         )
     elif status == "failed":
         publish_order_event(
@@ -167,6 +213,8 @@ def update_order_status(db: Session, order_id: int, status: str):
         )
 
     db.commit()
+    db.refresh(order)
+    logger.info(f"Order {order_id} updated and committed. Current status: {order.status}")
     return order
 
 

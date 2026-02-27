@@ -3,11 +3,21 @@ from pathlib import Path
 import argparse
 
 def _find_all_docker_files() -> list[Path]:
-    root = Path('../services')
+    services_root = Path('../services')
+    infrastructure_root = Path('../infrastructure')
+    frontend_root = Path('../frontend')
     docker_files = []
-    for service_path in root.iterdir():
+
+    if infrastructure_root.is_dir():
+        docker_files.append(infrastructure_root)
+
+    for service_path in services_root.iterdir():
         if service_path.is_dir() and not service_path.name.startswith('.'):
             docker_files.append(service_path)
+
+    if frontend_root.is_dir():
+        docker_files.append(frontend_root)
+
     return docker_files
 
 def run_containers():
@@ -19,7 +29,8 @@ def run_containers():
 
 def stop_containers():
     docker_files = _find_all_docker_files()
-    for docker_file in docker_files:
+    for docker_file in reversed(docker_files):
+        print(f"Stopping container from {docker_file}")
         subprocess.run(["docker-compose", "down"], cwd=docker_file, capture_output=False)
 
 

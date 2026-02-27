@@ -1,3 +1,9 @@
+"""Inventory Service FastAPI application.
+
+This service handles product stock management, including license key
+reservations, confirmations, and releases.
+"""
+
 from fastapi import FastAPI
 from app.routes.inventory import router as inventory_router
 

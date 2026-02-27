@@ -9,6 +9,11 @@ class CartAdd(BaseModel):
     quantity: int
 
 
+class CartPatch(BaseModel):
+    """Schema for updating cart item quantity."""
+    quantity: int
+
+
 class CartItemOut(BaseModel):
     """Schema for returning a single item in the cart."""
     id: int
@@ -54,3 +59,9 @@ class MessageResponse(BaseModel):
 class KeysResponse(BaseModel):
     """Schema for returning assigned license keys for a paid order."""
     keys: List[str]
+
+
+class PaymentStatusUpdate(BaseModel):
+    """Schema for payment status update request from Payment Service."""
+    status: str
+    payment_id: Optional[str] = None

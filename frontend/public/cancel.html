@@ -152,7 +152,9 @@
         }
 
         function goToOrders() {
-            window.location.href = 'http://localhost:8100/api/v1/orders/my';
+            // Przekieruj do strony głównej frontendu z parametrem otwierającym zamówienia
+            const frontendUrl = window.location.origin;
+            window.location.href = `${frontendUrl}?view=orders`;
         }
     </script>
 </body>

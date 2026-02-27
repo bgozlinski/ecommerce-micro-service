@@ -23,3 +23,13 @@ async def create_payment(request: Request, response: Response):
 )
 async def payment_webhook(request: Request, response: Response):
     pass
+
+@route(
+    request_method=router.post,
+    path="/payments/verify/{order_id}",
+    status_code=200,
+    service_url=settings.PAYMENT_SERVICE_URL,
+    authentication_required=True
+)
+async def verify_payment(request: Request, response: Response):
+    pass

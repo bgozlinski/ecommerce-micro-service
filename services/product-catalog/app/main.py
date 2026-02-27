@@ -22,9 +22,9 @@ async def health_check():
 
 @app.get("/")
 async def root():
-    """Root endpoint providing service metadata.
+    """Retrieve service information.
     
     Returns:
         dict: Service name and version.
     """
-    return {"message": "Product Service APIi", "version": "0.1.0"}
+    return {"message": "Product Service API", "version": "0.1.0"}

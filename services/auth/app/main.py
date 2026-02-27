@@ -29,4 +29,4 @@ async def root():
     Returns:
         dict: Service name and version.
     """
-    return {"message": "Auth Service APIi", "version": "0.1.0"}
+    return {"message": "Auth Service API", "version": "0.1.0"}

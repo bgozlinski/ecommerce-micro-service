@@ -5,6 +5,16 @@ from app.core.route_wrapper import route
 router = APIRouter()
 
 @route(
+    request_method=router.get,
+    path="/orders/cart",
+    status_code=200,
+    service_url=settings.ORDER_SERVICE_URL,
+    authentication_required=True
+)
+async def get_cart(request: Request, response: Response):
+    pass
+
+@route(
     request_method=router.post,
     path="/orders/cart",
     status_code=201,
@@ -12,6 +22,26 @@ router = APIRouter()
     authentication_required=True
 )
 async def add_to_cart(request: Request, response: Response):
+    pass
+
+@route(
+    request_method=router.patch,
+    path="/orders/cart/{item_id}",
+    status_code=200,
+    service_url=settings.ORDER_SERVICE_URL,
+    authentication_required=True
+)
+async def update_cart_item(request: Request, response: Response):
+    pass
+
+@route(
+    request_method=router.delete,
+    path="/orders/cart/{item_id}",
+    status_code=204,
+    service_url=settings.ORDER_SERVICE_URL,
+    authentication_required=True
+)
+async def delete_cart_item(request: Request, response: Response):
     pass
 
 @route(

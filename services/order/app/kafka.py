@@ -33,7 +33,7 @@ class KafkaProducerSingleton:
                                           retries=3,
                                           max_in_flight_requests_per_connection=1,
                                           compression_type='gzip',
-                                          request_timeout_ms=30000, # 30s timeout
+                                          request_timeout_ms=30000,
                                           )
 
         return cls._instance

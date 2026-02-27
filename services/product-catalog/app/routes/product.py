@@ -4,6 +4,7 @@ from app.core.database import get_db
 from app.repositories import product as product_crud
 from app.schemas import ProductCreate, ProductOut, ProductPatch
 from app.core.config import settings
+from app.kafka import publish_product_created, publish_product_updated
 
 router = APIRouter(prefix=settings.API_V1_PREFIX)
 
@@ -16,7 +17,7 @@ async def read_products(
     platform: str | None = Query(None),
     min_price_cents: int | None = Query(None, ge=0),
     max_price_cents: int | None = Query(None, ge=0),
-    is_active: bool | None = Query(True),
+    is_active: bool | None = Query(None),
     search: str | None = Query(None, min_length=1),
     sort_by: str = Query("created_at", pattern="^(created_at|updated_at|price_cents|name|id)$"),
     sort_dir: str = Query("desc", pattern="^(asc|desc)$"),
@@ -47,6 +48,7 @@ async def read_product(product_id: int, db: Session = Depends(get_db)):
 @router.post("/products", response_model=ProductOut, status_code=status.HTTP_201_CREATED)
 async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     product = product_crud.create_product(db=db, product=product)
+    publish_product_created(product_id=product.id, name=product.name, price_cents=product.price_cents)
     return product
 
 @router.delete("/products/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -61,4 +63,6 @@ async def update_product(product_id: int, dto: ProductPatch, db: Session = Depen
     updated = product_crud.update_product(db, product_id, dto)
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    changes = dto.model_dump(exclude_unset=True)
+    publish_product_updated(product_id=product_id, changes=changes)
     return updated
