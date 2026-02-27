@@ -55,7 +55,6 @@ def update_payment_status(
     if not payment:
         return None
 
-    old_status = payment.status
     payment.status = status
     payment.external_payment_id = external_payment_id
     payment.updated_at = datetime.now(timezone.utc)

@@ -4,7 +4,7 @@ from app.core.database import get_db
 from app.repositories import product as product_crud
 from app.schemas import ProductCreate, ProductOut, ProductPatch
 from app.core.config import settings
-from app.kafka import publish_product_created, publish_product_updated
+from app.kafka_producer import publish_product_created, publish_product_updated
 
 router = APIRouter(prefix=settings.API_V1_PREFIX)
 
