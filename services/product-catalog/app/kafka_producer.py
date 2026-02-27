@@ -3,14 +3,16 @@
 This module provides a singleton Kafka producer and helper functions for
 publishing product lifecycle events (created, updated) to the message broker
 for consumption by Notification and Reporting services.
-"""
 
-from kafka import KafkaProducer
-from kafka.errors import KafkaError
+Important: Avoid top-level imports from the external ``kafka`` package to
+prevent import-time name clashes during tests. We lazy-import the package
+inside ``get_instance`` instead.
+"""
 
 import json
 import logging
-from typing import Optional
+from typing import Optional, Any
+from importlib import import_module
 from .core.config import settings
 import uuid
 from datetime import datetime, timezone
@@ -19,12 +21,15 @@ logger = logging.getLogger(__name__)
 
 
 class KafkaProducerSingleton:
-    _instance: Optional[KafkaProducer] = None
+    _instance: Optional[Any] = None
 
     @classmethod
-    def get_instance(cls) -> KafkaProducer:
+    def get_instance(cls) -> Any:
         if cls._instance is None:
             logger.info("Tworzę nową instancję Kafka Producer")
+
+            kafka_pkg = import_module("kafka")
+            KafkaProducer = getattr(kafka_pkg, "KafkaProducer")
 
             cls._instance = KafkaProducer(
                 bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
@@ -67,7 +72,7 @@ def send_message(topic: str, payload: dict, key: Optional[str] = None):
         logger.info(
             f"Sent message to topic {record_metadata.topic} partition [{record_metadata.partition}] @ offset {record_metadata.offset}"
         )
-    except KafkaError as e:
+    except Exception as e:
         logger.error(f"Error sending message: {e}")
 
 
