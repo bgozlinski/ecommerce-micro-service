@@ -25,6 +25,6 @@ async def root():
     """Retrieve service information.
     
     Returns:
-        dict: Service name and version..
+        dict: Service name and version.
     """
     return {"message": "Product Service API", "version": "0.1.0"}
