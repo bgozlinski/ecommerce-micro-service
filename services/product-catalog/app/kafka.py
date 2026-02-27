@@ -16,30 +16,22 @@ Fix/approach:
 """
 
 from importlib import import_module
-
-# Proxy to the real external package "kafka" so that imports like
-# ``from kafka import KafkaProducer`` work even if this file is resolved.
-_kafka_pkg = import_module("kafka")
-
-# Re-export commonly used external symbols (add more if ever needed)
-KafkaProducer = getattr(_kafka_pkg, "KafkaProducer", None)
-errors = getattr(_kafka_pkg, "errors", None)
-KafkaError = getattr(errors, "KafkaError", None) if errors else None
-
-# Re-export our application producer helpers using ABSOLUTE import to avoid
-# relative import failures when this module is imported as top-level "kafka".
-from app.kafka_producer import (  # type: ignore F401
+from app.kafka_producer import (
     KafkaProducerSingleton,
     publish_product_created,
     publish_product_updated,
     send_message,
 )
 
+_kafka_pkg = import_module("kafka")
+
+KafkaProducer = getattr(_kafka_pkg, "KafkaProducer", None)
+errors = getattr(_kafka_pkg, "errors", None)
+KafkaError = getattr(errors, "KafkaError", None) if errors else None
+
 __all__ = [
-    # External
     "KafkaProducer",
     "KafkaError",
-    # App helpers
     "KafkaProducerSingleton",
     "publish_product_created",
     "publish_product_updated",
