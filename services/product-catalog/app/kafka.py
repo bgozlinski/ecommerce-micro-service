@@ -70,8 +70,4 @@ def __getattr__(name: str):
 __all__ = [
     "KafkaProducer",
     "KafkaError",
-    "KafkaProducerSingleton",
-    "publish_product_created",
-    "publish_product_updated",
-    "send_message",
 ]
